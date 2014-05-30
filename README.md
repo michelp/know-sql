@@ -63,15 +63,15 @@ postgres
 
 The HTTP_GET function:
 
-    - Queries the current schema looking for a function named 'get_total_products'
+  - Queries the current schema looking for a function named 'get_total_products'
 
-    - Parses the path "/2014/5" into the array '{2014, 5}'
+  - Parses the path "/2014/5" into the array '{2014, 5}'
 
-    - Queries the function's signature and generates the correct type casts
+  - Queries the function's signature and generates the correct type casts
 
-    - Authenticates the user, sets the current session's role
+  - Authenticates the user, sets the current session's role
 
-    - EXECUTE 'SELECT * FROM api.get_total_products('2014'::int, '5'::int);'
+  - EXECUTE 'SELECT * FROM api.get_total_products('2014'::int, '5'::int);'
 
 Example here would be a possible implementation of
 'get_total_products':
