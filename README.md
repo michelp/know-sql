@@ -33,7 +33,7 @@ postgres dispatch function called 'HTTP_GET':
                 postgres_pass   $db;
                 postgres_escape $user $remote_user;
                 postgres_escape $pass $remote_passwd;
-                postgres_query  HEAD GET "SELECT * FROM $schema.HTTP_GET('$function', '$path', '$user', '$pass')";
+                postgres_query  HEAD GET "SELECT * FROM $__http__.GET('$schema', '$function', '$path', '$user', '$pass')";
             }
             error_page   500 502 503 504  /50x.html;
             location = /50x.html {
@@ -47,16 +47,16 @@ elements to access functions in a schema in the database.  These URLs
 would generate the following calls:
 
     /products/api/total_products
-    SELECT * FROM api.HTTP_GET('total_products', '', <user>, <pass>);
+    SELECT * FROM __http__.GET('api', 'total_products', '', <user>, <pass>);
 
     /products/api/get_total_products/
-    SELECT * FROM api.HTTP_GET('total_products', '/', <user>, <pass>);
+    SELECT * FROM __http__.GET('api', 'total_products', '/', <user>, <pass>);
 
     /products/api/get_total_products/2014
-    SELECT * FROM api.HTTP_GET('total_products', '/2014', <user>, <pass>);
+    SELECT * FROM __http__.GET('api', 'total_products', '/2014', <user>, <pass>);
 
     /products/api/get_total_products/2014/05
-    SELECT * FROM api.HTTP_GET('total_products', '/2014/05', <user>, <pass>);
+    SELECT * FROM __http__.GET('api', 'total_products', '/2014/05', <user>, <pass>);
 
 postgres
 ========
