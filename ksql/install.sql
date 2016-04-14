@@ -54,7 +54,7 @@ $$ LANGUAGE SQL;
 CREATE FUNCTION http.get_test_not_found(jsonb, jsonb, jsonb) RETURNS table(environ jsonb, path jsonb, args jsonb) AS $$
 DECLARE
 BEGIN
-  RAISE '404 Not Found';
+  RAISE '404';
   RETURN QUERY SELECT $1, $2, $3;
 end;
 

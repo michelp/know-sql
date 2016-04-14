@@ -5,6 +5,7 @@ import logging
 import psycopg2
 from psycopg2.extras import Json
 from werkzeug.wrappers import Request, Response
+from werkzeug.exceptions import default_exceptions, InternalServerError
 
 global conn
 conn = psycopg2.connect('postgresql://michel@/michel')
@@ -42,9 +43,14 @@ def app(request):
             response = Response(dumps(result), mimetype='application/json')
             response.cache_control.max_age = 300
             return response
-    except:
-        logger.exception(request.path)
-        conn.rollback()
+    except psycopg2.Error, e:
+        try:
+            conn.rollback()
+            logger.exception(request.path)
+            code = int(e.diag.message_primary)
+        except Exception:
+            raise InternalServerError
+        raise default_exceptions.get(code, InternalServerError)
         
 if __name__ == '__main__':
     from werkzeug.serving import run_simple
