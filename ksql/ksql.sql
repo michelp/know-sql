@@ -24,7 +24,7 @@ CREATE FUNCTION http.process_request(
     environ jsonb,
     apath jsonb,
     args jsonb DEFAULT '{}',
-    request_data bytea DEFAULT null) RETURNS json AS $$
+    request_data jsonb DEFAULT null) RETURNS json AS $$
 DECLARE
     body text;
     result json;
@@ -38,19 +38,25 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE FUNCTION http.get_test(jsonb, jsonb, jsonb, bytea)
+CREATE FUNCTION http.get_test(jsonb, jsonb, jsonb, jsonb)
     RETURNS table(environ jsonb, path jsonb, args jsonb) AS $$
     select $1, $2, $3;
 $$ LANGUAGE SQL;
 
 
-CREATE FUNCTION http.post_test(jsonb, jsonb, jsonb, bytea)
-    RETURNS table(environ jsonb, path jsonb, args jsonb, request bytea) AS $$
+CREATE FUNCTION http.post_test(jsonb, jsonb, jsonb, jsonb)
+    RETURNS table(environ jsonb, path jsonb, args jsonb, request jsonb) AS $$
     select $1, $2, $3, $4;
 $$ LANGUAGE SQL;
 
 
-CREATE FUNCTION http.get_test_not_found(jsonb, jsonb, jsonb, bytea)
+CREATE FUNCTION http.post_test_json_body(jsonb, jsonb, jsonb, jsonb)
+    RETURNS table(environ jsonb, path jsonb, args jsonb, request jsonb) AS $$
+    select $1, $2, $3, $4::jsonb;
+$$ LANGUAGE SQL;
+
+
+CREATE FUNCTION http.get_test_not_found(jsonb, jsonb, jsonb, jsonb)
     RETURNS table(environ jsonb, path jsonb, args jsonb) AS $$
 DECLARE
 BEGIN

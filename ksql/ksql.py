@@ -1,6 +1,6 @@
 import os, re
 
-from json import dumps
+from json import loads, dumps
 import logging
 import psycopg2
 from psycopg2 import connect
@@ -44,24 +44,26 @@ def app(request):
     match = location_re.match(request.path)
 
     if not match:
-        raise NotFound
+        return NotFound()
 
     groups = match.groups()
     if not groups:
-        raise NotFound
+        return NotFound()
 
     db, schema, func_name, path = groups
     path = '' if path is None else path
     username = auth.username
     password = auth.password
 
-    environ = Json({k: v for k, v in request.environ.items() if k.isupper()})
-    path = Json(filter(None, path.split('/')))
-    args = Json(dict(request.args))
     try:
+        environ = Json({k: v for k, v in request.environ.items() if k.isupper()})
+        path = Json(filter(None, path.split('/')))
+        args = Json(dict(request.args))
+        data = Json(loads(request.get_data() or 'null'))
         db = connect(database=db, user=username, password=password)
     except Exception:
-        raise InternalServerError
+        logger.exception(request.path)
+        return InternalServerError()
     with db.cursor() as cur:
         try:
             cur.callproc(
@@ -69,7 +71,7 @@ def app(request):
                 (request.method,
                  schema, func_name,
                  environ, path, args,
-                 request.get_data()))
+                 data))
             result = cur.fetchone()[0]
             response = Response(dumps(result), mimetype='application/json')
             db.commit()
@@ -79,10 +81,10 @@ def app(request):
             logger.exception(request.path)
             if e.diag.message_primary.isdigit():
                 code = int(e.diag.message_primary)
-                raise default_exceptions.get(code, InternalServerError)
+                return default_exceptions.get(code, InternalServerError)()
             else:
-                raise InternalServerError(e.diag.message_primary)
+                return InternalServerError(e.diag.message_primary)
         except Exception:
             db.rollback()
             logger.exception(request.path)
-            raise InternalServerError
+            return InternalServerError
